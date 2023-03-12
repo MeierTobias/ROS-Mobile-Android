@@ -6,6 +6,7 @@
         <item>Button</item>
         <item>Camera</item>
         <item>Debug</item>
+        <item>DjiCamera</item>
         <item>Gps</item>
         <item>Joystick</item>
         <item>Label</item>
@@ -95,6 +96,10 @@
         A Debug Node which can show all topics similar to rostopic info.
     </string>
 
+    <!-- DjiCamera -->
+    <string name="DjiCamera_description">
+        DJI Camera publisher node
+    </string>
 
     <!-- GPS -->
     <string name="Gps_description">The GPS node is designed for displaying the GPS position of the
