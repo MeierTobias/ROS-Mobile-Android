@@ -10,16 +10,17 @@ import std_msgs.Bool;
 
 public class DjiActivationData extends BaseData {
 
-    public boolean activated;
+    private String status;
 
-    public DjiActivationData(boolean activated){
-        this.activated = activated;
+    public DjiActivationData(DjiActivationEntity entity){
+
+        status = entity.getConnectionStatus() + ";" + entity.getProductInfo();
     }
 
     @Override
     public Message toRosMessage(Publisher<Message> publisher, BaseEntity widget) {
-        std_msgs.Bool message = (Bool) publisher.newMessage();
-        message.setData(activated);
+        std_msgs.String message = (std_msgs.String) publisher.newMessage();
+        message.setData(status);
         return message;
     }
 }

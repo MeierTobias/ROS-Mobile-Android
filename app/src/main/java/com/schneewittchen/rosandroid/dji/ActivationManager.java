@@ -19,6 +19,9 @@ import androidx.core.content.ContextCompat;
 
 import com.schneewittchen.rosandroid.R;
 import com.schneewittchen.rosandroid.ui.activity.MainActivity;
+import com.schneewittchen.rosandroid.widgets.djiactivation.DjiActivationEntity;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +29,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
+import dji.common.realname.AppActivationState;
 import dji.common.util.CommonCallbacks;
 import dji.log.DJILog;
 import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.products.Aircraft;
+import dji.sdk.realname.AppActivationManager;
 import dji.sdk.sdkmanager.DJISDKInitEvent;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.sdkmanager.LDMModule;
@@ -41,6 +47,8 @@ public class ActivationManager {
     // general attributes
     private Context mContext;
     private Handler mHandler;
+    private DjiActivationEntity mEntity;
+    private static BaseProduct mProduct;
 
     // permission attributes
     private static final int REQUEST_PERMISSION_CODE = 12345;
@@ -71,28 +79,31 @@ public class ActivationManager {
     };
     private int lastProcess = -1;
 
+    // Connection attributes
+    private static final int MSG_INFORM_ACTIVATION = 1;
+    private static final int ACTIVATION_DELAY_TIME = 3000;
+    private AtomicBoolean hasAppActivationListenerStarted = new AtomicBoolean(false);
+    private AppActivationState.AppActivationStateListener appActivationStateListener;
+    public class ConnectionStatusUpdateEvent{}
+
     public ActivationManager(Context context) {
         mContext = context;
 
         //Initialize DJI SDK Manager
         mHandler = new Handler(Looper.getMainLooper());
-
-        // Register the broadcast receiver for receiving the device connection's changes.
-        //        IntentFilter filter = new IntentFilter();
-        //        filter.addAction(MApplication.FLAG_CONNECTION_CHANGE);
-        //        registerReceiver(mReceiver, filter);
     }
 
-    /*protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //refreshSDKRelativeUI();
-        }
-    };*/
+    public void setEntity(DjiActivationEntity entity) {
+        mEntity = entity;
+    }
+
 
     public void startRegistration() {
         if (checkAndRequestPermissions()) {
             startSDKRegistration();
+        }
+        else {
+            mEntity.setProductInfo("Info: missing permissions");
         }
     }
 
@@ -134,6 +145,7 @@ public class ActivationManager {
                                 DJILog.e("App registration", DJISDKError.REGISTRATION_SUCCESS.getDescription());
                                 DJISDKManager.getInstance().startConnectionToProduct();
                                 ToastUtils.setResultToToast("SDK Registered Successfully.");
+                                notifyStatusChange();
                             } else {
                                 ToastUtils.setResultToToast("SDK Registration Failed. Please check the bundle ID and your network connectivity." + djiError.getDescription());
                             }
@@ -202,6 +214,36 @@ public class ActivationManager {
     }
 
     private void notifyStatusChange() {
+        EventBus.getDefault().post(new ConnectionStatusUpdateEvent());
+    }
+
+    public void refreshStatus() {
+        mProduct = MApplication.getProductInstance();
+        Log.d(TAG, "mProduct: " + (mProduct == null ? "null" : "unnull"));
+        if (null != mProduct) {
+            if (mProduct.isConnected()) {
+                String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
+                mEntity.setConnectionStatus("Status: " + str + " connected");
+                if (mProduct instanceof Aircraft) {
+                    addAppActivationListenerIfNeeded();
+                }
+
+                if (null != mProduct.getModel()) {
+                    mEntity.setProductInfo("" + mProduct.getModel().getDisplayName());
+                } else {
+                    mEntity.setProductInfo("Product Information");
+                }
+            } else if (mProduct instanceof Aircraft) {
+                Aircraft aircraft = (Aircraft) mProduct;
+                if (aircraft.getRemoteController() != null && aircraft.getRemoteController().isConnected()) {
+                    mEntity.setConnectionStatus("Status: Only RC connected");
+                    mEntity.setProductInfo("Product Information");
+                }
+            }
+        } else {
+            mEntity.setConnectionStatus("Status: No Product Connected");
+            mEntity.setProductInfo("Product Information");
+        }
     }
 
     private void showDBVersion() {
@@ -221,5 +263,36 @@ public class ActivationManager {
                 });
             }
         }, 3000);
+    }
+
+    private void addAppActivationListenerIfNeeded() {
+        if (AppActivationManager.getInstance().getAppActivationState() != AppActivationState.ACTIVATED) {
+            sendDelayMsg(MSG_INFORM_ACTIVATION, ACTIVATION_DELAY_TIME);
+            if (hasAppActivationListenerStarted.compareAndSet(false, true)) {
+                appActivationStateListener = new AppActivationState.AppActivationStateListener() {
+
+                    @Override
+                    public void onUpdate(AppActivationState appActivationState) {
+                        if (mHandler != null && mHandler.hasMessages(MSG_INFORM_ACTIVATION)) {
+                            mHandler.removeMessages(MSG_INFORM_ACTIVATION);
+                        }
+                        if (appActivationState != AppActivationState.ACTIVATED) {
+                            sendDelayMsg(MSG_INFORM_ACTIVATION, ACTIVATION_DELAY_TIME);
+                        }
+                    }
+                };
+                AppActivationManager.getInstance().addAppActivationStateListener(appActivationStateListener);
+            }
+        }
+    }
+
+    private void sendDelayMsg(int msg, long delayMillis) {
+        if (mHandler == null) {
+            return;
+        }
+
+        if (!mHandler.hasMessages(msg)) {
+            mHandler.sendEmptyMessageDelayed(msg, delayMillis);
+        }
     }
 }

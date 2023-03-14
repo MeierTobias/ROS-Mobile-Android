@@ -1,6 +1,9 @@
 package com.schneewittchen.rosandroid.widgets.djiactivation;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -13,11 +16,15 @@ import androidx.annotation.Nullable;
 
 import com.schneewittchen.rosandroid.R;
 import com.schneewittchen.rosandroid.dji.ActivationManager;
+import com.schneewittchen.rosandroid.dji.MApplication;
 import com.schneewittchen.rosandroid.model.entities.widgets.BaseEntity;
 import com.schneewittchen.rosandroid.ui.views.widgets.PublisherWidgetView;
 import com.schneewittchen.rosandroid.utility.Utils;
 import com.schneewittchen.rosandroid.widgets.djicamera.DjiCameraView;
 import com.schneewittchen.rosandroid.widgets.label.LabelEntity;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 public class DjiActivationView extends PublisherWidgetView {
     public static final String TAG = DjiActivationView.class.getSimpleName();
@@ -25,23 +32,24 @@ public class DjiActivationView extends PublisherWidgetView {
     private TextPaint textPaint;
     private Paint linePaint;
     private float lineWidth;
-    private boolean activated = false;
 
     private ActivationManager activationManager;
 
     public DjiActivationView(Context context) {
         super(context);
-        activationManager = new ActivationManager(context);
-        init();
+        init(context);
     }
 
     public DjiActivationView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        activationManager = new ActivationManager(context);
-        init();
+        init(context);
     }
 
-    private void init() {
+    private void init(Context context) {
+        activationManager = new ActivationManager(context);
+
+        EventBus.getDefault().register(this);
+
         lineWidth = Utils.dpToPx(getContext(), 2);
 
         linePaint = new Paint();
@@ -59,19 +67,30 @@ public class DjiActivationView extends PublisherWidgetView {
     @Override
     public void setWidgetEntity(BaseEntity widgetEntity) {
         super.setWidgetEntity(widgetEntity);
+        activationManager.setEntity((DjiActivationEntity) widgetEntity);
         invalidate();
     }
+
+    @Subscribe
+    public void onConnectionStatusUpdateEvent(ActivationManager.ConnectionStatusUpdateEvent connectionStatusUpdateEvent){
+        activationManager.refreshStatus();
+        this.publishViewData(new DjiActivationData((DjiActivationEntity) widgetEntity));
+        invalidate();
+    }
+
+    /*@Override
+    public void onDestroy(){
+        EventBus.getDefault().unregister(this);
+    }*/
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (super.onTouchEvent(event)) {
             return true;
         }
-
-        this.activated = !this.activated;
-        this.publishViewData(new DjiActivationData(this.activated));
         invalidate();
 
+        this.publishViewData(new DjiActivationData((DjiActivationEntity) widgetEntity));
         activationManager.startRegistration();
 
         return true;
@@ -87,10 +106,12 @@ public class DjiActivationView extends PublisherWidgetView {
 
         float baseline = (textPaint.descent() + textPaint.ascent()) / 2f;
         float xPos = width / 2;
-        float yPos = height / 2f - baseline;
+        float yPos1 = height / 3f - baseline;
+        float yPos2 = height * 2f / 3f - baseline;
 
         canvas.save();
-        canvas.drawText(entity.text, xPos, yPos, textPaint);
+        canvas.drawText(entity.getConnectionStatus(), xPos, yPos1, textPaint);
+        canvas.drawText(entity.getProductInfo(), xPos, yPos2, textPaint);
         canvas.drawLine(0, height - lineWidth / 2, width, height - lineWidth / 2, linePaint);
         canvas.restore();
     }

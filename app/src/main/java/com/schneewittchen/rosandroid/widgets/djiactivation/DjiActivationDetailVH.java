@@ -8,10 +8,9 @@ import com.schneewittchen.rosandroid.model.entities.widgets.BaseEntity;
 import com.schneewittchen.rosandroid.ui.views.details.PublisherWidgetViewHolder;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import sensor_msgs.CompressedImage;
-import sensor_msgs.Image;
 
 public class DjiActivationDetailVH extends PublisherWidgetViewHolder {
     public static final String TAG = DjiActivationDetailVH.class.getSimpleName();
@@ -33,6 +32,6 @@ public class DjiActivationDetailVH extends PublisherWidgetViewHolder {
 
     @Override
     public List<String> getTopicTypes() {
-        return Arrays.asList(Image._TYPE, CompressedImage._TYPE);
+        return Collections.singletonList(std_msgs.String._TYPE);
     }
 }
