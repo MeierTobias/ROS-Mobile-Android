@@ -17,6 +17,7 @@ public class MApplication extends Application {
     private static Application app = null;
     private static BaseProduct product;
 
+
     @Override
     protected void attachBaseContext(Context paramContext) {
         super.attachBaseContext(paramContext);

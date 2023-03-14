@@ -2,23 +2,17 @@ package com.schneewittchen.rosandroid.dji;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.schneewittchen.rosandroid.R;
-import com.schneewittchen.rosandroid.ui.activity.MainActivity;
 import com.schneewittchen.rosandroid.widgets.djiactivation.DjiActivationEntity;
 
 import org.greenrobot.eventbus.EventBus;
@@ -42,12 +36,13 @@ import dji.sdk.sdkmanager.LDMModule;
 import dji.sdk.sdkmanager.LDMModuleType;
 
 public class ActivationManager {
+    private static volatile ActivationManager INSTANCE = null;
     private static final String TAG = ActivationManager.class.getName();
 
     // general attributes
     private Context mContext;
     private Handler mHandler;
-    private DjiActivationEntity mEntity;
+    private DjiActivationEntity mConnectionEntity;
     private static BaseProduct mProduct;
 
     // permission attributes
@@ -86,24 +81,40 @@ public class ActivationManager {
     private AppActivationState.AppActivationStateListener appActivationStateListener;
     public class ConnectionStatusUpdateEvent{}
 
-    public ActivationManager(Context context) {
-        mContext = context;
-
+    public ActivationManager() {
         //Initialize DJI SDK Manager
         mHandler = new Handler(Looper.getMainLooper());
     }
 
-    public void setEntity(DjiActivationEntity entity) {
-        mEntity = entity;
+    // public static method to retrieve the singleton instance
+    public static ActivationManager getInstance() {
+        if(INSTANCE == null) {
+            // synchronize the block to ensure only one thread can execute at a time
+            synchronized (ActivationManager.class) {
+                if (INSTANCE == null) {
+                    // create the singleton instance
+                    INSTANCE = new ActivationManager();
+                }
+            }
+        }
+        // return the singleton instance
+        return INSTANCE;
     }
 
+    public void setConnectionEntity(DjiActivationEntity entity) {
+        mConnectionEntity = entity;
+    }
+
+    public void setContext(Context context){
+        mContext = context;
+    }
 
     public void startRegistration() {
         if (checkAndRequestPermissions()) {
             startSDKRegistration();
         }
         else {
-            mEntity.setProductInfo("Info: missing permissions");
+            mConnectionEntity.setProductInfo("Info: missing permissions");
         }
     }
 
@@ -223,26 +234,26 @@ public class ActivationManager {
         if (null != mProduct) {
             if (mProduct.isConnected()) {
                 String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
-                mEntity.setConnectionStatus("Status: " + str + " connected");
+                mConnectionEntity.setConnectionStatus("Status: " + str + " connected");
                 if (mProduct instanceof Aircraft) {
                     addAppActivationListenerIfNeeded();
                 }
 
                 if (null != mProduct.getModel()) {
-                    mEntity.setProductInfo("" + mProduct.getModel().getDisplayName());
+                    mConnectionEntity.setProductInfo("" + mProduct.getModel().getDisplayName());
                 } else {
-                    mEntity.setProductInfo("Product Information");
+                    mConnectionEntity.setProductInfo("Product Information");
                 }
             } else if (mProduct instanceof Aircraft) {
                 Aircraft aircraft = (Aircraft) mProduct;
                 if (aircraft.getRemoteController() != null && aircraft.getRemoteController().isConnected()) {
-                    mEntity.setConnectionStatus("Status: Only RC connected");
-                    mEntity.setProductInfo("Product Information");
+                    mConnectionEntity.setConnectionStatus("Status: Only RC connected");
+                    mConnectionEntity.setProductInfo("Product Information");
                 }
             }
         } else {
-            mEntity.setConnectionStatus("Status: No Product Connected");
-            mEntity.setProductInfo("Product Information");
+            mConnectionEntity.setConnectionStatus("Status: No Product Connected");
+            mConnectionEntity.setProductInfo("Product Information");
         }
     }
 

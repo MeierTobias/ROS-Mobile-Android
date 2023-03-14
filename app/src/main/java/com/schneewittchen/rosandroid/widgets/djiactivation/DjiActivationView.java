@@ -33,8 +33,6 @@ public class DjiActivationView extends PublisherWidgetView {
     private Paint linePaint;
     private float lineWidth;
 
-    private ActivationManager activationManager;
-
     public DjiActivationView(Context context) {
         super(context);
         init(context);
@@ -46,7 +44,7 @@ public class DjiActivationView extends PublisherWidgetView {
     }
 
     private void init(Context context) {
-        activationManager = new ActivationManager(context);
+        ActivationManager.getInstance().setContext(context);
 
         EventBus.getDefault().register(this);
 
@@ -67,13 +65,13 @@ public class DjiActivationView extends PublisherWidgetView {
     @Override
     public void setWidgetEntity(BaseEntity widgetEntity) {
         super.setWidgetEntity(widgetEntity);
-        activationManager.setEntity((DjiActivationEntity) widgetEntity);
+        ActivationManager.getInstance().setConnectionEntity((DjiActivationEntity) widgetEntity);
         invalidate();
     }
 
     @Subscribe
     public void onConnectionStatusUpdateEvent(ActivationManager.ConnectionStatusUpdateEvent connectionStatusUpdateEvent){
-        activationManager.refreshStatus();
+        ActivationManager.getInstance().refreshStatus();
         this.publishViewData(new DjiActivationData((DjiActivationEntity) widgetEntity));
         invalidate();
     }
@@ -91,7 +89,7 @@ public class DjiActivationView extends PublisherWidgetView {
         invalidate();
 
         this.publishViewData(new DjiActivationData((DjiActivationEntity) widgetEntity));
-        activationManager.startRegistration();
+        ActivationManager.getInstance().startRegistration();
 
         return true;
     }
