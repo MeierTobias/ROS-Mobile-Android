@@ -6,6 +6,7 @@
         <item>Button</item>
         <item>Camera</item>
         <item>Debug</item>
+        <item>DjiActivation</item>
         <item>DjiCamera</item>
         <item>Gps</item>
         <item>Joystick</item>
@@ -94,6 +95,11 @@
     <!-- Debug -->
     <string name="Debug_description">
         A Debug Node which can show all topics similar to rostopic info.
+    </string>
+
+    <!-- DjiActivation -->
+    <string name="DjiActivation_description">
+        DJI Activation publisher node
     </string>
 
     <!-- DjiCamera -->
