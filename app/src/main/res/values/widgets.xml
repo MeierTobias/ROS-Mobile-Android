@@ -12,6 +12,7 @@
         <item>Gps</item>
         <item>Joystick</item>
         <item>Label</item>
+        <item>LockOrientation</item>
         <item>Logger</item>
         <item>RqtPlot</item>
         <item>SwitchButton</item>
@@ -155,6 +156,11 @@
     <!-- Logger -->
     <string name="Logger_description">
         A Logger message which simply prints String messages published to set topic.
+    </string>
+
+    <!-- Label -->
+    <string name="LockOrientation_description">
+        Locks the orientation of the app.
     </string>
 
     <!-- RqtPlot -->

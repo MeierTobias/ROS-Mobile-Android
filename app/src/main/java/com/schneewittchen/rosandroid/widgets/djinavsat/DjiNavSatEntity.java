@@ -1,7 +1,6 @@
 package com.schneewittchen.rosandroid.widgets.djinavsat;
 
 import com.schneewittchen.rosandroid.dji.MApplication;
-import com.schneewittchen.rosandroid.dji.ModuleVerificationUtil;
 import com.schneewittchen.rosandroid.model.entities.widgets.PublisherWidgetEntity;
 import com.schneewittchen.rosandroid.model.repositories.rosRepo.message.Topic;
 
@@ -11,10 +10,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import dji.common.flightcontroller.LocationCoordinate3D;
-import dji.common.flightcontroller.virtualstick.FlightCoordinateSystem;
-import dji.common.flightcontroller.virtualstick.RollPitchControlMode;
-import dji.common.flightcontroller.virtualstick.VerticalControlMode;
-import dji.common.flightcontroller.virtualstick.YawControlMode;
 import dji.sdk.flightcontroller.FlightController;
 
 public class DjiNavSatEntity extends PublisherWidgetEntity {
