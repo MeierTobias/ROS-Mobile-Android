@@ -8,6 +8,7 @@
         <item>Debug</item>
         <item>DjiActivation</item>
         <item>DjiCamera</item>
+        <item>DjiFlightService</item>
         <item>DjiNavSat</item>
         <item>Gps</item>
         <item>Joystick</item>
@@ -107,6 +108,11 @@
     <!-- DjiCamera -->
     <string name="DjiCamera_description">
         DJI Camera publisher node
+    </string>
+
+    <!-- DjiFlightService -->
+    <string name="DjiFlightService_description">
+        DJI flight service node
     </string>
 
     <!-- DjiNavSat -->

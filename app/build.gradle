@@ -82,6 +82,7 @@ dependencies {
     implementation 'org.ros.rosjava_messages:sensor_msgs:1.12.7'
     implementation 'org.ros.rosjava_messages:std_msgs:0.5.11'
     implementation 'org.ros.rosjava_messages:tf2_msgs:0.5.20'
+    implementation 'org.ros.rosjava_messages:std_srvs:1.11.2'
 
     // Room
     implementation "androidx.room:room-runtime:2.4.3"

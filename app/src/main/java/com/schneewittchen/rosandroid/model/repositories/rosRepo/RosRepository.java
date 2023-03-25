@@ -14,6 +14,7 @@ import com.schneewittchen.rosandroid.model.entities.MasterEntity;
 import com.schneewittchen.rosandroid.model.entities.widgets.BaseEntity;
 import com.schneewittchen.rosandroid.model.entities.widgets.GroupEntity;
 import com.schneewittchen.rosandroid.model.entities.widgets.IPublisherEntity;
+import com.schneewittchen.rosandroid.model.entities.widgets.IServiceEntity;
 import com.schneewittchen.rosandroid.model.entities.widgets.ISilentEntity;
 import com.schneewittchen.rosandroid.model.entities.widgets.ISubscriberEntity;
 import com.schneewittchen.rosandroid.model.repositories.rosRepo.connection.ConnectionCheckTask;
@@ -26,6 +27,7 @@ import com.schneewittchen.rosandroid.model.repositories.rosRepo.node.BaseData;
 import com.schneewittchen.rosandroid.model.repositories.rosRepo.node.NodeMainExecutorService;
 import com.schneewittchen.rosandroid.model.repositories.rosRepo.node.NodeMainExecutorServiceListener;
 import com.schneewittchen.rosandroid.model.repositories.rosRepo.node.PubNode;
+import com.schneewittchen.rosandroid.model.repositories.rosRepo.node.ServiceNode;
 import com.schneewittchen.rosandroid.model.repositories.rosRepo.node.SubNode;
 
 import org.ros.address.InetAddressFactory;
@@ -324,6 +326,8 @@ public class RosRepository implements SubNode.NodeListener {
         } else if (widget instanceof ISubscriberEntity) {
             node = new SubNode(this);
 
+        } else if (widget instanceof IServiceEntity) {
+            node = new ServiceNode();
         } else {
             Log.i(TAG, "Widget is either publisher nor subscriber.");
             return null;
