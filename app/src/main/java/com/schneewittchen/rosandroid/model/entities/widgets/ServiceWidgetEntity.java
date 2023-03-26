@@ -1,21 +1,35 @@
 package com.schneewittchen.rosandroid.model.entities.widgets;
 
 
+import com.schneewittchen.rosandroid.model.repositories.rosRepo.message.ServiceData;
 import com.schneewittchen.rosandroid.ui.general.Position;
 
-import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 public abstract class ServiceWidgetEntity
         extends BaseEntity
         implements IPositionEntity, IServiceEntity {
 
-    public String command;
-    public Method commandMethodRef;
+    public String commandNamespace;
+    public ArrayList<ServiceData> serviceCollection = new ArrayList<ServiceData>();
     public int posX;
     public int posY;
     public int width;
     public int height;
 
+    public ServiceWidgetEntity() {
+        super();
+    }
+
+    public ServiceWidgetEntity(ServiceWidgetEntity entity){
+        super();
+        this.commandNamespace = entity.commandNamespace;
+        this.serviceCollection = new ArrayList<ServiceData>(entity.serviceCollection);
+        this.posX = entity.posX;
+        this.posY = entity.posY;
+        this.width = entity.width;
+        this.height = entity.height;
+    }
 
     @Override
     public boolean equalRosState(BaseEntity other) {
@@ -29,8 +43,7 @@ public abstract class ServiceWidgetEntity
 
         ServiceWidgetEntity otherPub = (ServiceWidgetEntity) other;
 
-        return this.command == otherPub.command
-                && this.commandMethodRef == otherPub.commandMethodRef;
+        return this.commandNamespace.equals(otherPub.commandNamespace);
     }
 
     @Override

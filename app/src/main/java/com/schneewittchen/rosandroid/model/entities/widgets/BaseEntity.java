@@ -108,12 +108,13 @@ public abstract class BaseEntity {
 
                 // Check if children available and if object type is matching
                 if (value instanceof List) {
-                    ArrayList<BaseEntity> children = new ArrayList<>();
-                    for (BaseEntity child : this.childEntities) {
-                        children.add(child.copy());
+                    if (f.getName() == "childEntities") {
+                        ArrayList<BaseEntity> children = new ArrayList<>();
+                        for (BaseEntity child : this.childEntities) {
+                            children.add(child.copy());
+                        }
+                        f.set(newObj, children);
                     }
-                    f.set(newObj, children);
-
                 } else if (f.getType().equals(Topic.class)) {
                     Topic topicObj = (Topic) f.get(this);
                     f.set(newObj, new Topic(topicObj));
