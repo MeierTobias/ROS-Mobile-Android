@@ -3,15 +3,15 @@ package com.schneewittchen.rosandroid.model.repositories.rosRepo.node;
 import android.util.Log;
 
 import com.schneewittchen.rosandroid.model.entities.widgets.BaseEntity;
+import com.schneewittchen.rosandroid.model.entities.widgets.IServiceModel;
 import com.schneewittchen.rosandroid.model.entities.widgets.ServiceWidgetEntity;
-import com.schneewittchen.rosandroid.model.repositories.rosRepo.message.ServiceData;
+import com.schneewittchen.rosandroid.utility.Utils;
 
 import org.ros.exception.ServiceException;
 import org.ros.node.ConnectedNode;
 import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import std_srvs.EmptyRequest;
@@ -20,37 +20,32 @@ import std_srvs.EmptyResponse;
 public class ServiceNode extends AbstractNode {
 
     private String commandNamespace;
-    private ArrayList<ServiceData> serviceCollection = new ArrayList<ServiceData>();
+    private String serviceModelPath = "";
+    private ArrayList<String> commands = new ArrayList<String>();
 
 
     @Override
     public void onStart(ConnectedNode parentNode) {
         Log.i(TAG, "On Start:  " + commandNamespace);
 
-        for (ServiceData sd : serviceCollection) {
-            ServiceServer<EmptyRequest, EmptyResponse> existing = parentNode.getServiceServer(commandNamespace + "/" + sd.getCommand());
+        for (String command : commands) {
+            ServiceServer<EmptyRequest, EmptyResponse> existing = parentNode.getServiceServer(commandNamespace + "/" + command);
             if (existing == null) {
                 parentNode.newServiceServer(
-                        commandNamespace + "/" + sd.getCommand(),
+                        commandNamespace + "/" + command,
                         std_srvs.Empty._TYPE,
                         new ServiceResponseBuilder<EmptyRequest, EmptyResponse>() {
                             @Override
                             public void build(std_srvs.EmptyRequest request, std_srvs.EmptyResponse response)
                                     throws ServiceException {
-                                try {
-                                    sd.getCommandMethodRef().invoke((null));
-                                } catch (IllegalAccessException e) {
-                                    throw new RuntimeException(e);
-                                } catch (InvocationTargetException e) {
-                                    throw new RuntimeException(e);
-                                } catch (Exception e) {
-                                    Log.e(e.getClass().getSimpleName(), e.getMessage());
-                                }
+                                Object object = Utils.getObjectFromClassName(serviceModelPath);
+                                IServiceModel serviceModel = (IServiceModel) object;
+                                serviceModel.runMethodByCommand(command);
                             }
                         });
-                Log.i(TAG, "Service created:  " + commandNamespace + "/" + sd.getCommand());
+                Log.i(TAG, "Service created:  " + commandNamespace + "/" + command);
             } else {
-                Log.i(TAG, "Service already exists:  " + commandNamespace + "/" + sd.getCommand());
+                Log.i(TAG, "Service already exists:  " + commandNamespace + "/" + command);
             }
         }
     }
@@ -60,6 +55,7 @@ public class ServiceNode extends AbstractNode {
         super.setWidget(widget);
         ServiceWidgetEntity svWidget = (ServiceWidgetEntity) widget;
         commandNamespace = svWidget.commandNamespace;
-        serviceCollection = new ArrayList<ServiceData>(svWidget.serviceCollection);
+        serviceModelPath = svWidget.serviceModelPath;
+        commands = new ArrayList<String>(svWidget.commands);
     }
 }

@@ -1,7 +1,6 @@
 package com.schneewittchen.rosandroid.model.entities.widgets;
 
 
-import com.schneewittchen.rosandroid.model.repositories.rosRepo.message.ServiceData;
 import com.schneewittchen.rosandroid.ui.general.Position;
 
 import java.util.ArrayList;
@@ -11,7 +10,9 @@ public abstract class ServiceWidgetEntity
         implements IPositionEntity, IServiceEntity {
 
     public String commandNamespace;
-    public ArrayList<ServiceData> serviceCollection = new ArrayList<ServiceData>();
+
+    public String serviceModelPath = "";
+    public ArrayList<String> commands = new ArrayList<String>();
     public int posX;
     public int posY;
     public int width;
@@ -24,7 +25,8 @@ public abstract class ServiceWidgetEntity
     public ServiceWidgetEntity(ServiceWidgetEntity entity){
         super();
         this.commandNamespace = entity.commandNamespace;
-        this.serviceCollection = new ArrayList<ServiceData>(entity.serviceCollection);
+        this.serviceModelPath = entity.serviceModelPath;
+        this.commands = new ArrayList<String>(entity.commands);
         this.posX = entity.posX;
         this.posY = entity.posY;
         this.width = entity.width;
