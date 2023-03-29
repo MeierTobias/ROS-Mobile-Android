@@ -40,80 +40,79 @@ public class DjiFlightServiceModel implements IServiceModel {
 
     public void takeOffMethod() {
         Log.d(TAG, "Take-off command received");
-        initParams();
-        flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
-            @Override
-            public void onResult(DJIError djiError) {
-                if (djiError.getErrorCode() == 0) {
+        if (initParams()) {
+            flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
                     Log.d(TAG, "Take-off command completed");
-                } else {
-                    Log.w(TAG, djiError.getDescription());
+                    // pubResult.publish(pubResult.newMessage());
                 }
-                // pubResult.publish(pubResult.newMessage());
-            }
-        });
+            });
+        } else {
+            // throw error
+        }
     }
 
     public void landMethod() {
         Log.d(TAG, "Landing command received");
-        initParams();
-        flightController.startLanding(new CommonCallbacks.CompletionCallback() {
-            @Override
-            public void onResult(DJIError djiError) {
-                if (djiError.getErrorCode() == 0) {
+        if (initParams()) {
+            flightController.startLanding(new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
                     Log.d(TAG, "Landing command completed");
-                } else {
-                    Log.w(TAG, djiError.getDescription());
+                    // pubResult.publish(pubResult.newMessage());
                 }
-                // pubResult.publish(pubResult.newMessage());
-            }
-        });
+            });
+        } else {
+            // throw error
+        }
     }
 
     public void enableVirtualControlMethod() {
         Log.d(TAG, "EnableVirtualControl command received");
-        initParams();
-        flightController.setVirtualStickModeEnabled(true, new CommonCallbacks.CompletionCallback() {
-            @Override
-            public void onResult(DJIError djiError) {
-                flightController.setVirtualStickAdvancedModeEnabled(true);
-                if (djiError.getErrorCode() == 0) {
+        if (initParams()) {
+            flightController.setVirtualStickModeEnabled(true, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    flightController.setVirtualStickAdvancedModeEnabled(true);
                     Log.d(TAG, "EnableVirtualControl command completed");
-                } else {
-                    Log.w(TAG, djiError.getDescription());
+                    // pubResult.publish(pubResult.newMessage());
                 }
-                // pubResult.publish(pubResult.newMessage());
-            }
-        });
+            });
+        } else {
+            // throw error
+        }
     }
 
     public void disableVirtualControlMethod() {
-        initParams();
-        flightController.setVirtualStickModeEnabled(false, new CommonCallbacks.CompletionCallback() {
-            @Override
-            public void onResult(DJIError djiError) {
-                if (djiError.getErrorCode() == 0) {
+        Log.d(TAG, "DisableVirtualControl command received");
+        if (initParams()) {
+            flightController.setVirtualStickModeEnabled(false, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
                     Log.d(TAG, "DisableVirtualControl command completed");
-                } else {
-                    Log.w(TAG, djiError.getDescription());
+                    // pubResult.publish(pubResult.newMessage());
                 }
-                // pubResult.publish(pubResult.newMessage());
-            }
-        });
+            });
+        } else {
+            // throw error
+        }
     }
 
-    private void initParams() {
+    private boolean initParams() {
         if (flightController == null) {
             if (ModuleVerificationUtil.isFlightControllerAvailable()) {
                 flightController = MApplication.getAircraftInstance().getFlightController();
             } else {
                 Log.w(TAG, "Flight controller not available");
-                return;
+                return false;
             }
         }
         flightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
         flightController.setRollPitchControlMode(RollPitchControlMode.VELOCITY);
         flightController.setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
         flightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
+
+        return true;
     }
 }

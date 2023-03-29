@@ -27,6 +27,8 @@ public class DjiFlightServiceEntity extends ServiceWidgetEntity {
         this.commandNamespace = "dji/services/flight_control";
         this.commands.add("take_off");
         this.commands.add("land");
+        this.commands.add("enable_virtual_control");
+        this.commands.add("disable_virtual_control");
 
         String className = this.getClass().getSimpleName().substring(0, this.getClass().getSimpleName().length() - 6);
         this.serviceModelPath = String.format(Constants.SERVICE_FORMAT,
