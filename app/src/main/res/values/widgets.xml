@@ -10,6 +10,7 @@
         <item>DjiCamera</item>
         <item>DjiFlightService</item>
         <item>DjiNavSat</item>
+        <item>DjiVirtualControl</item>
         <item>Gps</item>
         <item>Joystick</item>
         <item>Label</item>
@@ -118,6 +119,11 @@
     <!-- DjiNavSat -->
     <string name="DjiNavSat_description">
         DJI NavSat publisher node
+    </string>
+
+    <!-- DjiVirtualControl -->
+    <string name="DjiVirtualControl_description">
+        DJI virtual control subscriber node. (Must be published between 5-25 Hz)
     </string>
 
     <!-- GPS -->
